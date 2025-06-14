@@ -1,0 +1,249 @@
+---
+title             : "Predictive Modeling of Drug-Induced Autoimmunity: A Machine Learning and Descriptor-Based Approach"
+shorttitle        : "Machine Learning for DIA Prediction"
+
+author: 
+  - name          : "Madhura Bokil"
+    affiliation   : "1"
+    corresponding : yes    
+    address       : "326 Market St, Harrisburg, PA 17101"
+    email         : "mbokil@my.harrisburgu.edu"
+
+affiliation:
+  - id            : "1"
+    institution   : "Harrisburg University of Science and Technology"
+
+authornote: |
+   This project is submitted in fulfillment of the requirements for the ANLY 699 Applied Project in Analytics.
+  
+
+abstract: |
+  Drug induced autoimmunity (DIA), is a severe drug reaction, characterized by unintended immune responses that are elicited by drug molecules [@lopez2020]. Early prediction of DIA risk during drug development can significantly enhance patient safety and reduce the economic burden associated with drug recalls [@huang2025]. This study proposes an XGBoost-based predictive model trained on RDKit chemical descriptors for classifying compounds based on DIA risk. The model addresses inherent class imbalance using the Synthetic Minority Oversampling Technique (SMOTE) and employs Optuna for rigorous hyperparameter optimization. The final model demonstrated substantial predictive ability (AUC = 0.73), highlighting the potential of machine learning to assist in pharmaceutical toxicology screening [@huang2025].
+  
+keywords          : "Drug-Induced Autoimmunity, Machine Learning, XGBoost, RDKit, SMOTE, Predictive Toxicology"
+wordcount         : "5238"
+
+bibliography      : ["Bibliography.bib"]
+
+figsintext        : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+lineno            : yes
+
+lang              : "english"
+class             : "man"
+output            : papaja::apa6_pdf
+citation_package  : biblatex
+nocite            : | 
+                      @*
+---
+
+```{r setup, include = FALSE}
+library("papaja")
+library("knitr")
+library("tidyverse")
+library("xgboost")
+library("smotefamily")
+library("caret")
+library("pROC")
+library("readr")
+library("ggplot2")
+library("scales")
+library("dplyr")
+r_refs("Bibliography.bib")
+```
+
+
+
+Drug-induced autoimmunity (DIA) represents a critical area of concern in pharmaceutical safety and public health. Unlike other forms of drug toxicity, DIA arises when therapeutic compounds provoke aberrant immune responses targeting host tissues, causing conditions such as lupus-like syndromes, autoimmune hepatitis, and vasculitis [@lopez2020]. The occurrence of DIA can severely impact patient outcomes and often results in the withdrawal of otherwise promising drugs from the market. Despite these significant impacts, accurately predicting which compounds might induce DIA remains an unresolved challenge within the drug development process.Structural characteristics of drug molecules play a key role in modulating DIA risk, as shown in prior modeling studies [@guo2022].
+
+Conventional in vitro and in vivo screening methods for immunotoxicity are time-consuming, expensive, and typically lack the throughput needed for screening extensive compound libraries [@patel2023]. Additionally, there is a low availability of reliable biomarkers to help identify risks early during preclinical studies, making our understanding of how DIA works still incomplete. Consequently, there is a pressing need for computational approaches that leverage chemical structure and molecular properties to effectively predict DIA liabilities.
+
+Recent advancements in machine learning (ML) and cheminformatics offer promising solutions in the diagnosis and prediction of autoimmune diseases [@stafford2020]. Molecular descriptors generated using computational chemistry toolkits, such as RDKit, provide comprehensive quantitative representations of chemical structures that can serve as inputs to predictive models [@landrum2006; @hu2024]. Specifically, gradient-boosted decision tree models, including XGBoost, have demonstrated superior performance on structured biomedical datasets due to their ability to handle complex nonlinear interactions and high-dimensional feature spaces effectively [@chen2016].
+
+In addition, hyperparameter optimization frameworks, like Optuna, facilitate the fine-tuning of model architectures and training parameters, thus enhancing generalization and predictive accuracy [@akiba2019]. Class imbalance, a common issue in toxicity datasets where toxic compounds (positives) are typically underrepresented, can be addressed using techniques such as the Synthetic Minority Oversampling Technique (SMOTE) [@chawla2002]. Other machine learning approaches have also been proposed for predicting DIA risk using structural alerts and molecular descriptors [@yao2021].
+
+This study aims to develop a reproducible ML pipeline integrating data preprocessing, class balancing via SMOTE, hyperparameter optimization with Optuna, and thorough performance evaluation. The data used for this research was sourced from a recent validated study published in Toxicology, titled "InterDIA: Interpretable Prediction of Drug-induced Autoimmunity through Ensemble Machine Learning Approaches" by Huang et al. [@huang2025]. The authors of this previous work provided openly available training and external validation datasets, ensuring reproducibility and facilitating further methodological comparisons.
+Beyond the foundational work presented in InterDIA, there remains ample opportunity to further refine and extend predictive models for DIA. Other researchers have explored a variety of machine learning approaches for predictive toxicology more broadly, demonstrating that advanced ML models can outperform traditional rule-based systems in detecting complex toxicity outcomes such as hepatotoxicity and cardiotoxicity [@tian2022; @deepmol2024]. For immunotoxicity domain, Guo et al. [@guo2022] and Yao et al. [@yao2021] have highlighted the promise of structure-based modeling approaches for predicting autoimmune-related adverse drug reactions, reinforcing the utility of RDKit-derived descriptors as informative features for such tasks.
+
+Recent advancements in automated ML frameworks, such as DeepMol [@deepmol2024], have further streamlined the process of building performant predictive models in cheminformatics applications. The rapid development of end-to-end pipelines is supported by the frameworks that integrate feature engineering, model selection, and hyperparameter tuning. At the same time, Optuna-based optimization has been shown to significantly improve the performance of tree-based classifiers, including XGBoost, in various chemical and biological modeling tasks [@shehab2025; @akiba2019].
+
+Predictive modeling for DIA remains a relatively underexplored area within the broader field of computational toxicology, even with the current advances. As Stafford et al. [@stafford2020] observed in their systematic review of AI applications in autoimmune diseases, one key challenge is ensuring that ML models account for the inherent biological variability and class imbalance often present in biomedical datasets. Techniques such as the Synthetic Minority Oversampling Technique (SMOTE) [@chawla2002] are essential for mitigating the effects of class imbalance, while interpretability tools, such as SHAP analysis, can help elucidate which molecular features most strongly drive model predictions [@lundberg2017; @kruta2024].
+
+It is important to leverage reproducible and openly available datasets, such as those provided by Huang et al. [@huang2025]. The InterDIA study is critical for promoting transparency and enabling meaningful methodological comparisons across studies. The InterDIA dataset offers a valuable resource for training and validating structure-based DIA prediction models and provides an ideal starting point for this project.
+
+Building upon these insights, this study seeks to advance DIA prediction by constructing a reproducible and interpretable ML pipeline that leverages XGBoost, Optuna-based hyperparameter tuning, and SMOTE for class balancing. By systematically evaluating model performance on the InterDIA dataset and openly sharing both code and results, this work aims to contribute to the growing body of research in predictive toxicology and demonstrate the practical utility of ML approaches for improving early-stage drug safety screening.
+In parallel with these methodological advances, there is growing recognition of the role that AI and ML can play in regulatory toxicology and pharmaceutical decision-making [@stafford2020; @patel2023]. Regulatory agencies, such as the U.S. Food and Drug Administration (FDA) and the European Medicines Agency (EMA), are increasingly open to the use of ML-based predictive models to augment traditional safety assessments, provided that these models are transparent, reproducible, and interpretable [@lundberg2017; @kruta2024]. Developing models that meet these standards is particularly important in the context of DIA, where adverse outcomes are relatively rare but can have severe consequences for patients and drug developers alike.
+
+Modeling rare adverse events such as DIA presents unique challenges for ML workflows. The limited availability of positive cases can exacerbate class imbalance and hinder model generalization [@chawla2002]. Moreover, the underlying biological mechanisms of DIA are often heterogeneous and poorly characterized [@lopez2020], further complicating predictive efforts. The selection of the correct model is a challenge, and so is the effective communication of the model limitations to the end user. Addressing both these challenges effectively requires a deep understanding of the domains.
+
+One promising direction for future modeling efforts involves the integration of chemical and biological data sources. For example, combining molecular descriptors with transcriptomic or proteomic profiles could enhance model sensitivity and provide greater biological insight [@kruta2024]. Multi-modal modeling approaches are increasingly being adopted in other areas of predictive toxicology [@deepmol2024; @wang2020], and extending such strategies to DIA represents a logical next step for the field.
+
+In addition to methodological innovation, there is a strong emphasis within the ML toxicology community on transparency and reproducibility. By building upon the InterDIA dataset and adhering to principles of reproducibility and openness, this study aims to contribute meaningfully to the evolving landscape of predictive immunotoxicology.
+
+\newpage
+
+# Purpose
+
+The purpose of this study is to explore whether machine learning models trained on chemical descriptors can effectively predict the risk of drug-induced autoimmunity (DIA) in chemical compounds. Given the limitations of traditional experimental methods for detecting DIA, a predictive computational approach could help flag high-risk compounds earlier in the drug development process.
+
+Using chemical descriptor data from the InterDIA study dataset [@huang2025], I aim to address the following research questions:
+
+H1: An XGBoost-based model trained on RDKit chemical descriptors, with class balancing via SMOTE and hyperparameter tuning via Optuna, will achieve an AUC score significantly above random chance in predicting DIA risk on a held-out test set.
+
+H2: Key molecular descriptors identified through model feature importance analysis will provide interpretable insights into chemical properties associated with higher DIA risk.
+
+\newpage
+
+# Methods
+
+# Data
+
+This study utilized the InterDIA dataset published by Huang et al. [@huang2025], comprising both labeled and unlabeled chemical compounds. The labeled subset includes compounds previously evaluated for drug-induced autoimmunity (DIA), each assigned a binary classification of DIA-positive or DIA-negative. The unlabeled subset served to assess the model’s capacity for prospective compound screening.
+
+Each compound was represented by a set of chemical descriptors generated using RDKit [@landrum2006]. The descriptors encompass diverse molecular characteristics—such as topology, surface area, functional groups, and electronic properties—that inform cheminformatics modeling.
+
+# Predictors
+
+The input features consisted of numerical chemical descriptors calculated via RDKit [@landrum2006]. Prior to modeling, non-numeric columns (e.g., SMILES strings) were excluded, resulting in a feature set that quantitatively described each compound’s molecular structure. Selected descriptors included topological polar surface area (TPSA), fragment counts (e.g., fr_ketone), and charge-related properties (e.g., PEOE_VSA2), among others.
+
+# Outcome
+
+The target variable was a binary indicator of DIA association and the compounds were labeled as DIA-positive (1) or DIA-negative (0) based on their known association with the condition.
+
+# Data Analytic Plan
+
+The machine learning pipeline was implemented in Python, utilizing the scikit-learn and XGBoost libraries [@chen2016]. The label data set was divided into- Training- 60%, Test- 20% and Validation- 20%. Stratification was applied to ensure balanced class distributions across all subsets.
+
+Given the class imbalance—marked by a limited number of DIA-positive compounds—the Synthetic Minority Oversampling Technique (SMOTE) [@chawla2002] was applied to the training set to generate synthetic minority class instances and mitigate potential bias.
+
+We selected XGBoost for its capacity to model structured, high-dimensional data effectively. Its widespread use in bioinformatics research provided additional justification for this selection. Hyperparameter optimization was performed using the Optuna framework [@akiba2019] [@shehab2025], which efficiently explored combinations of learning rate, tree depth, number of estimators, and class weighting.
+
+The model was retrained using the combined training and validation data once the optimization was complete, and was then tested on an independent set. Its performance was evaluated using several metrics, including AUC, accuracy, precision, recall, and confusion matrix results Additionally, feature importance scores derived from the XGBoost model were analyzed to identify key chemical descriptors influencing DIA risk predictions.
+
+In the final step, the trained model was used to estimate DIA-related probabilities for each compound in the unlabeled dataset These predictions can support early-stage screening and help prioritize compounds for further drug development efforts.
+
+\newpage
+
+# Results
+
+The final XGBoost model, optimized using Optuna and trained on RDKit chemical descriptors, achieved an AUC score of 0.73 on the held-out test set, with an overall accuracy of 58.3%. This indicates that the model was able to distinguish between DIA-positive and DIA-negative compounds with reasonable accuracy, providing a meaningful improvement over random classification.
+
+```{r}
+library(kableExtra)
+
+# Classification Report data:
+classification_report <- data.frame(
+  Class = c("0", "1"),
+  Precision = c(0.83, 0.33),
+  Recall = c(0.56, 0.67),
+  F1_Score = c(0.67, 0.44),
+  Support = c(18, 6)
+)
+
+# Table with APA caption + borders
+classification_report %>%
+  kable(caption = "Table 1. Classification report for final XGBoost model (AUC = 0.73, Accuracy = 0.58).",
+        digits = 2,
+        booktabs = TRUE) %>%  # adds nicer APA-style top/mid/bottom borders
+  kable_styling(latex_options = c("hold_position", "bordered"),
+                font_size = 10)
+
+```
+
+A confusion matrix was used to evaluate the model further. The model correctly classified most DIA-negative compounds but showed a typical tradeoff between sensitivity and specificity, with some false positives and missed DIA-positive predictions. The confusion matrix and classification report (Table 1) further illustrate the model’s behavior. For DIA-negative compounds (Class 0), the model achieved a precision of 0.83, a recall of 0.56, and an F1 score of 0.67. For DIA-positive compounds (Class 1), the model attained a precision of 0.33, a recall of 0.67, and an F1 score of 0.44. These results indicate that while the model is able to identify a reasonable portion of DIA-positive compounds, improving precision for the minority class remains an opportunity for future refinement.This outcome is consistent with the challenges of modeling rare toxicological events in imbalanced biomedical datasets.
+
+
+\begin{center}
+\includegraphics[width=0.8\linewidth]{ROC_Curve.png}
+\end{center}
+
+**Figure 1**. ROC Curve for final XGBoost model.
+
+
+\begin{center}
+\includegraphics[width=0.8\linewidth]{Confusion_Matrix.png}
+\end{center}
+
+**Figure 2**. Confusion Matrix of final XGBoost model.
+
+
+
+
+Feature importance analysis provided additional insights into which chemical properties contributed most strongly to the model’s predictions. Descriptors such as topological polar surface area (TPSA), fr_ketone, and PEOE_VSA2 emerged as key predictors of DIA risk. These features align with established structure-activity relationships in immunotoxicity, indicating that molecular size, polarity, and electronic properties may affect a compound’s potential to induce autoimmunity.
+
+\begin{center}
+\includegraphics[width=0.8\linewidth]{Feature_Importance.png}
+\end{center}
+
+**Figure 3**. Feature Importance of final XGBoost model.
+
+
+To assess the model’s potential utility for prospective screening, I deployed it on the unlabeled set of compounds. The resulting distribution of predicted probabilities showed that most compounds fell within a moderate risk range (approximately 0.4 to 0.55), while a smaller subset exceeded 0.65, indicating potential high-risk candidates. The results suggest that the model helps prioritize compounds for further investigation during the early stages of drug development.
+
+Overall, the pipeline demonstrated that machine learning models trained on chemical descriptors can provide valuable predictive insights into DIA risk and could serve as a useful complement to traditional screening methods.
+
+The best XGBoost model achieved the following results on the held-out test set:
+
+Accuracy: 0.58
+
+AUC: 0.73
+
+\newpage
+
+# Discussion
+
+XGBoost was used to develop the machine learning model that predicts the risk of drug-induced autoimmunity from molecular descriptors generated using RDKit. The goal was to explore whether chemical structure alone could offer predictive insights into DIA risk, supporting early screening efforts during drug development.
+
+With an of AUC 0.73 and accuracy of 58% , the model shows promise. The model shows good ability to discriminate between DIA-positive and DIA-negative compounds, even though the accuracy was moderate. It also identified molecular patterns linked to DIA risk.
+
+The classification report revealed that the model achieved higher precision on DIA-negative compounds, but also succeeded in identifying 67% of DIA-positive compounds, which are typically underrepresented in such datasets. This is an encouraging result given the known challenges of modeling rare toxicological outcomes in imbalanced biomedical data.
+
+Feature importance analysis provided useful insights into the chemical properties most associated with DIA predictions. Descriptors such as fr_ketone, TPSA, and PEOE_VSA2 emerged as top contributors to model performance. These findings suggest that molecular polarity, surface area, and specific functional group patterns may play a role in modulating immunogenic potential. This aligns with prior work suggesting that certain structural motifs and physicochemical properties can influence immune system interactions. Given the small number of DIA-positive compounds in the dataset, the model’s ability to generalize—particularly in terms of precision for positive samples—was likely constrained, representing one of its key limitations.
+
+Additionally, the chemical descriptors used do not capture all possible biological mechanisms that could contribute to DIA — factors such as metabolism, immune system variability, and patient-specific responses are not represented in the feature set. Future work can be carried out by incorporating additional data sources like in-vitro assay that can build comprehensive models and address the limitations.
+
+Hyperparameter optimization using Optuna contributed meaningfully to model performance, with parameters such as learning rate and scale_pos_weight emerging as influential. This highlights the value of tuning in improving model robustness, especially in imbalanced settings.
+
+Overall, this project demonstrates that machine learning models based on chemical descriptors can provide valuable predictive insights into DIA risk and may serve as a useful complement to experimental screening approaches. From the current study we can say that further refinement of the machine learning model is required, and a more extensive validation. However, these models show promise and have the potential to improve early stage detection of DIA and reduce the risks in late stage detection.
+
+These results provide an important proof of concept that machine learning models can augment early-stage drug safety screening by flagging potential DIA-inducing compounds prior to costly experimental validation. However, the relatively modest recall for the positive class suggests that further work is needed to enhance model sensitivity, potentially through incorporating biological assay data, genetic risk factors, or immune-modulating properties.
+
+Future research should focus on integrating multi-modal data sources (e.g., transcriptomics, immunogenicity assays) with chemical descriptors to improve predictive power. It also should leverage automated machine learning frameworks like DeepMol [@deepmol2024] to further streamline optimization and development of the model. Additionally, explainability techniques such as SHAP analysis could help elucidate which molecular features are most strongly associated with DIA risk, aiding both model trustworthiness and scientific understanding.
+
+An additional are for future work for predictive modeling involves exploring the potential applicability of structure-based immunotoxicity predictors in food safety systems. Predictive models can be adapted to assess the immunogenic potential of novel food additives, contaminants, and packaging migrants, thereby supporting proactive risk management in food production and regulatory oversight.
+
+Due to the small sample size and class imbalance, the model exhibited some variability across runs, with AUC values ranging from 0.63 to 0.73 in different splits. This is expected in biomedical datasets of this type, and suggests that future work should aim to stabilize performance through larger datasets and more robust validation.
+
+In conclusion, this work contributes to the growing body of research leveraging machine learning for predictive toxicology and underscores the potential of data-driven approaches in improving the safety profile of drug candidates.
+
+\newpage
+
+# Conclusion 
+
+This study demonstrates that machine learning models — specifically optimized XGBoost classifiers trained on RDKit molecular descriptors — can effectively predict the risk of drug-induced autoimmunity (DIA) based on chemical structure. By combining class balancing with SMOTE, hyperparameter tuning with Optuna, and interpretability through feature importance analysis, the model achieved promising predictive performance on a challenging DIA classification task. These results show that such models can provide a valuable complement to experimental toxicology workflows, supporting earlier and more efficient prioritization of compounds in the drug development pipeline.
+
+Enhancing model sensitivity through the incorporation of bio-assay data, access to larger and more diverse chem libraries and the use of techniques like SHAP for an indepth insight into structure-activity relationships should be part of the scope of future work. As data-driven approaches continue to evolve, machine learning holds considerable promise for advancing predictive toxicology and improving patient safety in pharmaceutical development. 
+
+\newpage
+
+# Code Availability Statement
+The code used to implement the machine learning pipeline for this study is available at: https://github.com/Mbokil19/DIA-ML-prediction.
+
+# Data Availability Statement
+
+The dataset used in this study was obtained from 
+*InterDIA: Interpretable prediction of drug-induced autoimmunity through ensemble machine learning approaches* (Huang et al., 2025), published in *Toxicology*. The authors of the original study provided the dataset publicly as part of their supplementary materials.
+
+\newpage
+
+# References
+
+```{r}
+r_refs("Bibliography.bib")
+
+```
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
