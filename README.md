@@ -8,7 +8,6 @@ as part of the ANLY 699 Capstone Course.
 
 Drug-induced autoimmunity (DIA) poses a serious challenge in pharmaceutical safety. This study presents a reproducible machine learning pipeline that uses molecular descriptors derived from RDKit to predict the risk of DIA. An XGBoost classifier was trained on publicly available data and optimized using Optuna, with class imbalance addressed via SMOTE.
 
----
 
 ## 📁 Repository Structure
 
@@ -25,7 +24,6 @@ Drug-induced autoimmunity (DIA) poses a serious challenge in pharmaceutical safe
 | `Bibliography.bib`                | BibTeX file with all citations used in the paper |
 | `README.md`                       | You're here! Project summary and usage |
 
----
 
 ##  Getting Started
 
@@ -38,8 +36,6 @@ To reproduce the results:
 4. Run all cells and modify parameters as needed
 5. R users can compile the `.Rmd` using `papaja::apa6_pdf`
 
----
-
 ## 📊 Results Summary
 
 - Accuracy: ~87.5%  
@@ -47,14 +43,11 @@ To reproduce the results:
 - Moderate recall for DIA-positive class  
 - Top predictive features were derived from structural descriptors (e.g., TPSA, PEOE_VSA2)
 
----
-
 ## Code & Data Availability
 
 All data used in this study was sourced from the **InterDIA** dataset published in Huang et al. (2025) via *Toxicology*.  
 The trained model, preprocessing pipeline, and all code files are included in this repository.
 
----
 
 ## Future Work
 
@@ -63,13 +56,11 @@ This model can be extended through:
 - SHAP-based interpretability
 - Adaptation to food safety risk prediction
 
----
 
 ##  License
 
 This repository is shared under the MIT License.
 
----
 
 ##  Contact
 
